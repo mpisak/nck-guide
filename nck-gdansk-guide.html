@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NCK Gdańsk – Jak dojechać / How to get here</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a2e;
+    --sea: #0077b6;
+    --sea-light: #90e0ef;
+    --amber: #f4a726;
+    --cream: #fdf8f0;
+    --white: #ffffff;
+    --gray: #6b7280;
+    --light: #f1f5f9;
+    --shadow: 0 4px 24px rgba(0,119,182,0.10);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--ink);
+    color: var(--white);
+    padding: 32px 24px 28px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    bottom: -30px; left: -10%; width: 120%;
+    height: 60px;
+    background: var(--cream);
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+    z-index: 1;
+  }
+  .header-inner { position: relative; z-index: 2; }
+  .header-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 13px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 6px;
+  }
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(26px, 5vw, 42px);
+    font-weight: 900;
+    line-height: 1.15;
+    margin-bottom: 8px;
+  }
+  header h1 span { color: var(--sea-light); }
+  .header-sub {
+    font-size: 14px;
+    color: rgba(255,255,255,0.65);
+    letter-spacing: 0.5px;
+  }
+
+  /* LANG SWITCHER */
+  .lang-bar {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 22px 16px 8px;
+  }
+  .lang-btn {
+    padding: 7px 22px;
+    border-radius: 999px;
+    border: 2px solid var(--sea);
+    background: transparent;
+    color: var(--sea);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .lang-btn.active, .lang-btn:hover {
+    background: var(--sea);
+    color: var(--white);
+  }
+
+  /* MAIN */
+  main { max-width: 720px; margin: 0 auto; padding: 8px 16px 60px; }
+
+  /* SECTION TITLE */
+  .section-label {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--sea);
+    font-weight: 600;
+    margin-bottom: 8px;
+    margin-top: 32px;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 16px;
+  }
+
+  /* TRANSPORT PICKER */
+  .transport-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  .transport-card {
+    background: var(--white);
+    border: 2.5px solid transparent;
+    border-radius: 16px;
+    padding: 18px 10px 14px;
+    text-align: center;
+    cursor: pointer;
+    transition: all .22s cubic-bezier(.4,0,.2,1);
+    box-shadow: var(--shadow);
+  }
+  .transport-card:hover { border-color: var(--sea-light); transform: translateY(-2px); }
+  .transport-card.selected {
+    border-color: var(--sea);
+    background: #e8f4fd;
+  }
+  .transport-icon { font-size: 32px; margin-bottom: 8px; }
+  .transport-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.3;
+  }
+  .transport-detail {
+    font-size: 11px;
+    color: var(--gray);
+    margin-top: 3px;
+  }
+
+  /* DESTINATION PICKER */
+  .dest-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  .dest-card {
+    background: var(--white);
+    border: 2.5px solid transparent;
+    border-radius: 16px;
+    padding: 16px 14px;
+    cursor: pointer;
+    transition: all .22s;
+    box-shadow: var(--shadow);
+  }
+  .dest-card:hover { border-color: var(--amber); transform: translateY(-2px); }
+  .dest-card.selected { border-color: var(--amber); background: #fef9ee; }
+  .dest-icon { font-size: 24px; margin-bottom: 6px; }
+  .dest-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .dest-addr { font-size: 12px; color: var(--gray); margin-top: 3px; }
+
+  /* ROUTE CARD */
+  #route-output { display: none; }
+  #route-output.visible { display: block; }
+
+  .route-card {
+    background: var(--white);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,119,182,0.12);
+    margin-bottom: 20px;
+  }
+  .route-header {
+    background: var(--ink);
+    color: var(--white);
+    padding: 18px 22px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .route-header-left h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .route-header-left p { font-size: 12px; color: rgba(255,255,255,0.65); margin-top: 2px; }
+  .badge {
+    background: var(--amber);
+    color: var(--ink);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .route-body { padding: 22px; }
+
+  /* STEPS */
+  .steps { list-style: none; position: relative; }
+  .steps::before {
+    content: '';
+    position: absolute;
+    left: 19px; top: 0; bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--sea), var(--sea-light));
+  }
+  .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 0 0 22px 0;
+    position: relative;
+  }
+  .step:last-child { padding-bottom: 0; }
+  .step-num {
+    width: 38px; height: 38px; min-width: 38px;
+    background: var(--sea);
+    color: var(--white);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px;
+    position: relative; z-index: 1;
+    box-shadow: 0 0 0 4px var(--white);
+  }
+  .step-num.final { background: var(--amber); color: var(--ink); }
+  .step-content { padding-top: 6px; }
+  .step-title { font-weight: 600; font-size: 15px; color: var(--ink); }
+  .step-desc { font-size: 13px; color: var(--gray); margin-top: 4px; line-height: 1.5; }
+  .step-tag {
+    display: inline-block;
+    background: var(--light);
+    color: var(--sea);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 999px;
+    margin-top: 6px;
+  }
+  .step-tag.bus { background: #fef3c7; color: #92400e; }
+  .step-tag.walk { background: #dcfce7; color: #166534; }
+  .step-tag.train { background: #dbeafe; color: #1e40af; }
+
+  /* TIP BOX */
+  .tip-box {
+    background: #f0f9ff;
+    border-left: 4px solid var(--sea);
+    border-radius: 0 12px 12px 0;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--ink);
+    margin-top: 18px;
+    line-height: 1.6;
+  }
+  .tip-box strong { color: var(--sea); }
+
+  /* MAP LINK */
+  .map-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: var(--ink);
+    color: var(--white);
+    border-radius: 12px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    transition: background .2s;
+  }
+  .map-link:hover { background: var(--sea); }
+
+  /* PRINT BUTTON */
+  .print-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    justify-content: center;
+    margin-top: 20px;
+    padding: 14px;
+    background: transparent;
+    border: 2px solid var(--ink);
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .print-btn:hover { background: var(--ink); color: var(--white); }
+
+  /* CONTACT */
+  .contact-box {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin-top: 24px;
+    box-shadow: var(--shadow);
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--gray);
+  }
+  .contact-box strong { color: var(--ink); font-size: 14px; }
+  .contact-box a { color: var(--sea); text-decoration: none; }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--gray);
+    font-size: 14px;
+  }
+  .empty-state .big-icon { font-size: 48px; margin-bottom: 12px; }
+
+  /* PRINT */
+  @media print {
+    header, .lang-bar, .transport-grid, .dest-grid, .print-btn, .contact-box, .section-label, .section-title { display: none !important; }
+    #route-output { display: block !important; }
+    body { background: white; }
+    .route-card { box-shadow: none; border: 1px solid #ccc; }
+    .route-header { background: #1a1a2e !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+
+  @media (max-width: 400px) {
+    .transport-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .transport-icon { font-size: 26px; }
+    .transport-name { font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-logo">Nadbałtyckie Centrum Kultury</div>
+    <h1>Jak <span>dotrzeć</span><br>do NCK Gdańsk</h1>
+    <p class="header-sub" id="header-sub">Wybierz środek transportu i cel podróży</p>
+  </div>
+</header>
+
+<div class="lang-bar">
+  <button class="lang-btn active" onclick="setLang('pl')" id="btn-pl">🇵🇱 Polski</button>
+  <button class="lang-btn" onclick="setLang('en')" id="btn-en">🇬🇧 English</button>
+</div>
+
+<main>
+  <p class="section-label" id="lbl-transport">Skąd przyjeżdżasz?</p>
+  <p class="section-title" id="ttl-transport">Wybierz środek transportu</p>
+
+  <div class="transport-grid">
+    <div class="transport-card" onclick="selectTransport('plane')" id="tc-plane">
+      <div class="transport-icon">✈️</div>
+      <div class="transport-name" id="tn-plane">Samolot</div>
+      <div class="transport-detail" id="td-plane">Port Lotniczy</div>
+    </div>
+    <div class="transport-card" onclick="selectTransport('train')" id="tc-train">
+      <div class="transport-icon">🚂</div>
+      <div class="transport-name" id="tn-train">Pociąg</div>
+      <div class="transport-detail" id="td-train">Gdańsk Główny</div>
+    </div>
+    <div class="transport-card" onclick="selectTransport('bus')" id="tc-bus">
+      <div class="transport-icon">🚌</div>
+      <div class="transport-name" id="tn-bus">Autokar</div>
+      <div class="transport-detail" id="td-bus">Dworzec PKS</div>
+    </div>
+  </div>
+
+  <p class="section-label" id="lbl-dest">Dokąd zmierzasz?</p>
+  <p class="section-title" id="ttl-dest">Wybierz cel podróży</p>
+
+  <div class="dest-grid">
+    <div class="dest-card" onclick="selectDest('ratusz')" id="dc-ratusz">
+      <div class="dest-icon">🏛️</div>
+      <div class="dest-name" id="dn-ratusz">Ratusz Staromiejski</div>
+      <div class="dest-addr">Korzenna 33/35 – biuro NCK</div>
+    </div>
+    <div class="dest-card" onclick="selectDest('jan')" id="dc-jan">
+      <div class="dest-icon">⛪</div>
+      <div class="dest-name" id="dn-jan">Centrum Św. Jana</div>
+      <div class="dest-addr">Świętojańska 50</div>
+    </div>
+  </div>
+
+  <div id="route-output">
+    <div class="route-card" id="route-card-content"></div>
+    <button class="print-btn" onclick="window.print()" id="print-btn">
+      🖨️ <span id="print-label">Drukuj trasę</span>
+    </button>
+  </div>
+
+  <div class="contact-box">
+    <strong id="contact-title">Potrzebujesz pomocy?</strong><br>
+    <span id="contact-text">Skontaktuj się z Wiktorią Maniecką:</span><br>
+    <a href="mailto:wiktoriamaniecka@nck.org.pl">wiktoriamaniecka@nck.org.pl</a><br>
+    <a href="tel:+48881412472">881 412 472</a> <span id="contact-sms">(tylko wiadomości SMS)</span>
+  </div>
+</main>
+
+<script>
+const T = {
+  pl: {
+    headerSub: "Wybierz środek transportu i cel podróży",
+    lblTransport: "Skąd przyjeżdżasz?",
+    ttlTransport: "Wybierz środek transportu",
+    tnPlane: "Samolot", tdPlane: "Port Lotniczy",
+    tnTrain: "Pociąg", tdTrain: "Gdańsk Główny",
+    tnBus: "Autokar", tdBus: "Dworzec PKS",
+    lblDest: "Dokąd zmierzasz?",
+    ttlDest: "Wybierz cel podróży",
+    dnRatusz: "Ratusz Staromiejski",
+    dnJan: "Centrum Św. Jana",
+    contactTitle: "Potrzebujesz pomocy?",
+    contactText: "Skontaktuj się z Wiktorią Maniecką:",
+    contactSms: "(tylko wiadomości SMS)",
+    printLabel: "Drukuj trasę",
+    time: "Szacowany czas",
+    mapsLink: "🗺️ Otwórz w Google Maps",
+    tip: "💡 Wskazówka",
+    badge: {
+      plane: "~40 min",
+      train_ratusz: "~10 min",
+      train_jan: "~18 min",
+      bus_ratusz: "~5 min",
+      bus_jan: "~12 min",
+    }
+  },
+  en: {
+    headerSub: "Select your transport and destination",
+    lblTransport: "Where are you coming from?",
+    ttlTransport: "Select your transport",
+    tnPlane: "Plane", tdPlane: "Airport",
+    tnTrain: "Train", tdTrain: "Gdańsk Główny",
+    tnBus: "Coach", tdBus: "Bus Station",
+    lblDest: "Where are you going?",
+    ttlDest: "Select your destination",
+    dnRatusz: "Old Town Hall",
+    dnJan: "St. John's Centre",
+    contactTitle: "Need help?",
+    contactText: "Contact Wiktoria Maniecka:",
+    contactSms: "(SMS messages only)",
+    printLabel: "Print route",
+    time: "Estimated time",
+    mapsLink: "🗺️ Open in Google Maps",
+    tip: "💡 Tip",
+    badge: {
+      plane: "~40 min",
+      train_ratusz: "~10 min",
+      train_jan: "~18 min",
+      bus_ratusz: "~5 min",
+      bus_jan: "~12 min",
+    }
+  }
+};
+
+// ---- ROUTES DATA ----
+const ROUTES = {
+  pl: {
+    plane_ratusz: {
+      title: "Lotnisko → Ratusz Staromiejski (NCK)",
+      subtitle: "Port Lotniczy Gdańsk im. Lecha Wałęsy → Korzenna 33/35",
+      badge: "~40 min",
+      mapUrl: "https://www.google.com/maps/dir/Gda%C5%84sk+Lech+Walesa+Airport,+Juliusza+S%C5%82owackiego+200,+80-298+Gda%C5%84sk/Korzenna+33,+80-851+Gda%C5%84sk",
+      steps: [
+        { icon: "🏃", title: "Wyjdź z terminala", desc: "Po odebraniu bagażu wyjdź przez wyjście główne terminala.", tag: "walk", tagText: "pieszo" },
+        { icon: "🚂", title: "Pociąg POLREGIO do Gdańska Wrzeszcza", desc: "Stacja kolejowa jest tuż obok terminala. Kup bilet u konduktora lub z automatu (ok. 7 zł / ulgowy 51% taniej). Jedź do stacji Gdańsk Wrzeszcz.", tag: "train", tagText: "pociąg POLREGIO" },
+        { icon: "🚃", title: "SKM z Wrzeszcza do Gdańska Głównego", desc: "Na stacji Gdańsk Wrzeszcz przesiądź się na pociąg SKM (peron 3, tor 501) w kierunku Gdańsk Główny. Posiadacze biletu 7-dniowego SKM nie muszą kupować dodatkowego biletu.", tag: "train", tagText: "pociąg SKM" },
+        { icon: "🚶", title: "Spacer do Ratusza Staromiejskiego", desc: "Z Gdańska Głównego idź pieszo ulicami Śródmieścia w kierunku Starego Miasta. Trasa zajmuje ok. 15 minut. Cel: Korzenna 33/35.", tag: "walk", tagText: "~15 min pieszo", final: true },
+      ],
+      tip: "<strong>Bilet SKM 7-dniowy</strong> kosztuje 61 zł (normalny) lub 30 zł (studencki) i obejmuje nieograniczone przejazdy koleją SKM i POLREGIO w Trójmieście. Kup go na <a href='https://www.skm.pkp.pl/dla-pasazera/kup-bilet' target='_blank' style='color:var(--sea)'>skm.pkp.pl</a> lub w aplikacji System Fala / Jak Dojade / SkyCash."
+    },
+    plane_jan: {
+      title: "Lotnisko → Centrum Św. Jana",
+      subtitle: "Port Lotniczy Gdańsk → Świętojańska 50",
+      badge: "~45 min",
+      mapUrl: "https://www.google.com/maps/dir/Gda%C5%84sk+Lech+Walesa+Airport/Ko%C5%9Bci%C3%B3%C5%82+%C5%9Bw.+Jana+Gda%C5%84sk+%C5%9Awi%C4%99toja%C5%84ska+50",
+      steps: [
+        { icon: "🏃", title: "Wyjdź z terminala", desc: "Po odebraniu bagażu wyjdź przez wyjście główne.", tag: "walk", tagText: "pieszo" },
+        { icon: "🚌", title: "Autobus 110 (alternatywa)", desc: "Możesz też wsiąść do autobusu nr 110 (bilet 4,80 zł kartą płatniczą w autobusie). Kierunek: Gdańsk Wrzeszcz.", tag: "bus", tagText: "autobus 110" },
+        { icon: "🚂", title: "Pociąg POLREGIO → Gdańsk Wrzeszcz", desc: "Stacja przy terminalu. Kup bilet z automatu lub u konduktora (ok. 7 zł). Jedź do stacji Gdańsk Wrzeszcz.", tag: "train", tagText: "pociąg POLREGIO" },
+        { icon: "🚃", title: "SKM → Gdańsk Główny", desc: "Na Wrzeszczu przesiądź się na SKM (peron 3, tor 501) i jedź do Gdańsk Główny.", tag: "train", tagText: "pociąg SKM" },
+        { icon: "🚶", title: "Spacer do Centrum Św. Jana", desc: "Z Gdańska Głównego idź w kierunku Starego Miasta. Centrum Sv. Jana (Świętojańska 50) to ok. 18–20 minut spaceru.", tag: "walk", tagText: "~18 min pieszo", final: true },
+      ],
+      tip: "<strong>Bilet SKM 7-dniowy</strong> kosztuje 61 zł (normalny) lub 30 zł (studencki). Kup go na <a href='https://www.skm.pkp.pl/dla-pasazera/kup-bilet' target='_blank' style='color:var(--sea)'>skm.pkp.pl</a>."
+    },
+    train_ratusz: {
+      title: "Gdańsk Główny → Ratusz Staromiejski (NCK)",
+      subtitle: "Dworzec PKP Gdańsk Główny → Korzenna 33/35",
+      badge: "~10 min",
+      mapUrl: "https://www.google.com/maps/dir/Gda%C5%84sk+G%C5%82%C3%B3wny/Korzenna+33%2F35,+80-851+Gda%C5%84sk",
+      steps: [
+        { icon: "🚂", title: "Przyjechałeś/aś do Gdańska Głównego", desc: "Wyjdź z peronu w stronę centrum miasta (wyjście od strony Śródmieścia).", tag: "train", tagText: "jesteś tutaj" },
+        { icon: "🚶", title: "Spacer do Ratusza Staromiejskiego", desc: "Idź na wprost ulicą 3 Maja, następnie skręć w Wały Jagiellońskie. Przejdź przez Most Chlebowy w kierunku Starego Miasta. Ratusz Staromiejski (Korzenna 33/35) znajdziesz po lewej stronie, ok. 10 minut spaceru.", tag: "walk", tagText: "~10 min pieszo", final: true },
+      ],
+      tip: "Orientuj się na charakterystyczną Złotą Bramę i Długi Targ – Ratusz Staromiejski jest tuż za nimi, po stronie północnej."
+    },
+    train_jan: {
+      title: "Gdańsk Główny → Centrum Św. Jana",
+      subtitle: "Dworzec PKP Gdańsk Główny → Świętojańska 50",
+      badge: "~18 min",
+      mapUrl: "https://www.google.com/maps/dir/Gda%C5%84sk+G%C5%82%C3%B3wny/Ko%C5%9Bci%C3%B3%C5%82+%C5%9Bw.+Jana,+%C5%9Awi%C4%99toja%C5%84ska+50,+80-840+Gda%C5%84sk",
+      steps: [
+        { icon: "🚂", title: "Przyjechałeś/aś do Gdańska Głównego", desc: "Wyjdź z peronu w stronę centrum.", tag: "train", tagText: "jesteś tutaj" },
+        { icon: "🚶", title: "Spacer do Centrum Świętego Jana", desc: "Kieruj się na Stare Miasto. Wejdź w ulicę Świętojańską – Centrum Świętego Jana (nr 50) leży w północnej części Głównego Miasta, ok. 17–20 minut spaceru od stacji.", tag: "walk", tagText: "~18 min pieszo", final: true },
+      ],
+      tip: "Centrum Świętego Jana mieści się w zabytkowym kościele gotyckim. Wejście od ulicy Świętojańskiej."
+    },
+    bus_ratusz: {
+      title: "Dworzec Autobusowy → Ratusz Staromiejski (NCK)",
+      subtitle: "Gdański Dworzec Autobusowy → Korzenna 33/35",
+      badge: "~5 min",
+      mapUrl: "https://www.google.com/maps/dir/Gda%C5%84sk,+Dworzec+Autobusowy/Korzenna+33%2F35,+80-851+Gda%C5%84sk",
+      steps: [
+        { icon: "🚌", title: "Wysiadasz na Dworcu Autobusowym", desc: "Dworzec autobusowy PKS znajduje się przy ul. 3 Maja, tuż obok Gdańska Głównego.", tag: "bus", tagText: "jesteś tutaj" },
+        { icon: "🚶", title: "Spacer do Ratusza Staromiejskiego", desc: "Stamtąd to zaledwie 5–7 minut spaceru. Idź wzdłuż ul. 3 Maja, wejdź w Wały Jagiellońskie i kieruj się w stronę Starego Miasta. Ratusz Staromiejski (Korzenna 33/35) czeka na Ciebie po lewej stronie.", tag: "walk", tagText: "~5 min pieszo", final: true },
+      ],
+      tip: "Dworzec autobusowy jest praktycznie połączony z Gdańskiem Głównym – wychodzisz i jesteś już blisko Starego Miasta."
+    },
+    bus_jan: {
+      title: "Dworzec Autobusowy → Centrum Św. Jana",
+      subtitle: "Gdański Dworzec Autobusowy → Świętojańska 50",
+      badge: "~12 min",
+      mapUrl: "https://www.google.com/maps/dir/Gda%C5%84sk,+Dworzec+Autobusowy/Ko%C5%9Bci%C3%B3%C5%82+%C5%9Bw.+Jana,+%C5%9Awi%C4%99toja%C5%84ska+50,+80-840+Gda%C5%84sk",
+      steps: [
+        { icon: "🚌", title: "Wysiadasz na Dworcu Autobusowym", desc: "Dworzec PKS jest przy ul. 3 Maja, obok stacji kolejowej Gdańsk Główny.", tag: "bus", tagText: "jesteś tutaj" },
+        { icon: "🚶", title: "Spacer do Centrum Świętego Jana", desc: "Idź w kierunku Starego Miasta przez ulicę 3 Maja i Wały Jagiellońskie. Wejdź do Głównego Miasta i skieruj się ku ulicy Świętojańskiej. Centrum Świętego Jana (nr 50) jest ok. 12 minut od dworca.", tag: "walk", tagText: "~12 min pieszo", final: true },
+      ],
+      tip: "Centrum Świętego Jana mieści się w zabytkowym kościele gotyckim przy ul. Świętojańskiej 50."
+    },
+  },
+  en: {
+    plane_ratusz: {
+      title: "Airport → Old Town Hall (NCK)",
+      subtitle: "Gdańsk Lech Wałęsa Airport → Korzenna 33/35",
+      badge: "~40 min",
+      mapUrl: "https://www.google.com/maps/dir/Gda%C5%84sk+Lech+Walesa+Airport,+Juliusza+S%C5%82owackiego+200,+80-298+Gda%C5%84sk/Korzenna+33,+80-851+Gda%C5%84sk",
+      steps: [
+        { icon: "🏃", title: "Exit the terminal", desc: "After collecting your luggage, head out through the main terminal exit.", tag: "walk", tagText: "on foot" },
+        { icon: "🚂", title: "POLREGIO train to Gdańsk Wrzeszcz", desc: "The railway station is right next to the terminal. Buy a ticket from the machine or conductor (approx. 7 PLN / 51% off with student ID). Travel to Gdańsk Wrzeszcz.", tag: "train", tagText: "POLREGIO train" },
+        { icon: "🚃", title: "SKM train to Gdańsk Główny", desc: "At Gdańsk Wrzeszcz, board the SKM train (platform 3, track 501) heading to Gdańsk Główny. No additional ticket needed if you have a 7-day SKM pass.", tag: "train", tagText: "SKM train" },
+        { icon: "🚶", title: "Walk to the Old Town Hall", desc: "From Gdańsk Główny, walk towards the Old Town. The journey takes approx. 15 minutes. Destination: Korzenna 33/35.", tag: "walk", tagText: "~15 min walk", final: true },
+      ],
+      tip: "<strong>7-day SKM ticket</strong> costs 61 PLN (regular) or 30 PLN (student) and covers unlimited SKM and POLREGIO travel in the Tri-City area. Buy it at <a href='https://www.skm.pkp.pl/dla-pasazera/kup-bilet' target='_blank' style='color:var(--sea)'>skm.pkp.pl</a> or via the System Fala / Jak Dojade / SkyCash apps."
+    },
+    plane_jan: {
+      title: "Airport → St. John's Centre",
+      subtitle: "Gdańsk Airport → Świętojańska 50",
+      badge: "~45 min",
+      mapUrl: "https://www.google.com/maps/dir/Gda%C5%84sk+Lech+Walesa+Airport/Ko%C5%9Bci%C3%B3%C5%82+%C5%9Bw.+Jana+Gda%C5%84sk+%C5%9Awi%C4%99toja%C5%84ska+50",
+      steps: [
+        { icon: "🏃", title: "Exit the terminal", desc: "Head out through the main terminal exit after collecting your bags.", tag: "walk", tagText: "on foot" },
+        { icon: "🚌", title: "Bus 110 (alternative)", desc: "Alternatively, take bus no. 110 (4.80 PLN, pay by card on the bus). Direction: Gdańsk Wrzeszcz.", tag: "bus", tagText: "bus 110" },
+        { icon: "🚂", title: "POLREGIO train → Gdańsk Wrzeszcz", desc: "The station is right by the terminal. Buy a ticket from the machine or conductor (approx. 7 PLN). Travel to Gdańsk Wrzeszcz.", tag: "train", tagText: "POLREGIO train" },
+        { icon: "🚃", title: "SKM → Gdańsk Główny", desc: "At Wrzeszcz, board the SKM train (platform 3, track 501) to Gdańsk Główny.", tag: "train", tagText: "SKM train" },
+        { icon: "🚶", title: "Walk to St. John's Centre", desc: "From Gdańsk Główny, walk towards the Old Town. St. John's Centre (Świętojańska 50) is an 18–20 minute walk.", tag: "walk", tagText: "~18 min walk", final: true },
+      ],
+      tip: "<strong>7-day SKM ticket</strong> costs 61 PLN (regular) or 30 PLN (student). Buy it at <a href='https://www.skm.pkp.pl/dla-pasazera/kup-bilet' target='_blank' style='color:var(--sea)'>skm.pkp.pl</a>."
+    },
+    train_ratusz: {
+      title: "Gdańsk Główny → Old Town Hall (NCK)",
+      subtitle: "Gdańsk Główny Railway Station → Korzenna 33/35",
+      badge: "~10 min",
+      mapUrl: "https://www.google.com/maps/dir/Gda%C5%84sk+G%C5%82%C3%B3wny/Korzenna+33%2F35,+80-851+Gda%C5%84sk",
+      steps: [
+        { icon: "🚂", title: "You've arrived at Gdańsk Główny", desc: "Exit the platform heading towards the city centre (exit on the Śródmieście side).", tag: "train", tagText: "you are here" },
+        { icon: "🚶", title: "Walk to the Old Town Hall", desc: "Head straight along 3 Maja St., then turn onto Wały Jagiellońskie. Cross Most Chlebowy bridge towards the Old Town. The Old Town Hall (Korzenna 33/35) is on your left, about a 10-minute walk.", tag: "walk", tagText: "~10 min walk", final: true },
+      ],
+      tip: "Look for the iconic Golden Gate (Złota Brama) and Long Market (Długi Targ) – the Old Town Hall is right behind them, on the north side."
+    },
+    train_jan: {
+      title: "Gdańsk Główny → St. John's Centre",
+      subtitle: "Gdańsk Główny Railway Station → Świętojańska 50",
+      badge: "~18 min",
+      mapUrl: "https://www.google.com/maps/dir/Gda%C5%84sk+G%C5%82%C3%B3wny/Ko%C5%9Bci%C3%B3%C5%82+%C5%9Bw.+Jana,+%C5%9Awi%C4%99toja%C5%84ska+50,+80-840+Gda%C5%84sk",
+      steps: [
+        { icon: "🚂", title: "You've arrived at Gdańsk Główny", desc: "Exit towards the city centre.", tag: "train", tagText: "you are here" },
+        { icon: "🚶", title: "Walk to St. John's Centre", desc: "Head towards the Old Town. Enter Świętojańska street – St. John's Centre (no. 50) is in the northern part of the Main Town, about 17–20 minutes from the station.", tag: "walk", tagText: "~18 min walk", final: true },
+      ],
+      tip: "St. John's Centre is housed in a historic Gothic church. Entrance from Świętojańska street."
+    },
+    bus_ratusz: {
+      title: "Coach Station → Old Town Hall (NCK)",
+      subtitle: "Gdańsk Bus Station → Korzenna 33/35",
+      badge: "~5 min",
+      mapUrl: "https://www.google.com/maps/dir/Gda%C5%84sk,+Dworzec+Autobusowy/Korzenna+33%2F35,+80-851+Gda%C5%84sk",
+      steps: [
+        { icon: "🚌", title: "You've arrived at the coach station", desc: "The PKS bus station is located on 3 Maja St., right next to Gdańsk Główny railway station.", tag: "bus", tagText: "you are here" },
+        { icon: "🚶", title: "Walk to the Old Town Hall", desc: "Just a 5–7 minute walk. Head along 3 Maja St., turn onto Wały Jagiellońskie and walk towards the Old Town. The Old Town Hall (Korzenna 33/35) will be on your left.", tag: "walk", tagText: "~5 min walk", final: true },
+      ],
+      tip: "The bus station is practically adjacent to Gdańsk Główny – once you step outside, you're already close to the Old Town."
+    },
+    bus_jan: {
+      title: "Coach Station → St. John's Centre",
+      subtitle: "Gdańsk Bus Station → Świętojańska 50",
+      badge: "~12 min",
+      mapUrl: "https://www.google.com/maps/dir/Gda%C5%84sk,+Dworzec+Autobusowy/Ko%C5%9Bci%C3%B3%C5%82+%C5%9Bw.+Jana,+%C5%9Awi%C4%99toja%C5%84ska+50,+80-840+Gda%C5%84sk",
+      steps: [
+        { icon: "🚌", title: "You've arrived at the coach station", desc: "The PKS station is on 3 Maja St., next to Gdańsk Główny railway station.", tag: "bus", tagText: "you are here" },
+        { icon: "🚶", title: "Walk to St. John's Centre", desc: "Walk towards the Old Town via 3 Maja St. and Wały Jagiellońskie. Enter the Main Town and head to Świętojańska street. St. John's Centre (no. 50) is about 12 minutes from the station.", tag: "walk", tagText: "~12 min walk", final: true },
+      ],
+      tip: "St. John's Centre is in a beautiful Gothic church at Świętojańska 50."
+    },
+  }
+};
+
+let currentLang = 'pl';
+let selectedTransport = null;
+let selectedDest = null;
+
+function setLang(lang) {
+  currentLang = lang;
+  document.getElementById('btn-pl').classList.toggle('active', lang === 'pl');
+  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+  document.documentElement.lang = lang;
+
+  const t = T[lang];
+  document.getElementById('header-sub').textContent = t.headerSub;
+  document.getElementById('lbl-transport').textContent = t.lblTransport;
+  document.getElementById('ttl-transport').textContent = t.ttlTransport;
+  document.getElementById('tn-plane').textContent = t.tnPlane;
+  document.getElementById('td-plane').textContent = t.tdPlane;
+  document.getElementById('tn-train').textContent = t.tnTrain;
+  document.getElementById('td-train').textContent = t.tdTrain;
+  document.getElementById('tn-bus').textContent = t.tnBus;
+  document.getElementById('td-bus').textContent = t.tdBus;
+  document.getElementById('lbl-dest').textContent = t.lblDest;
+  document.getElementById('ttl-dest').textContent = t.ttlDest;
+  document.getElementById('dn-ratusz').textContent = t.dnRatusz;
+  document.getElementById('dn-jan').textContent = t.dnJan;
+  document.getElementById('contact-title').textContent = t.contactTitle;
+  document.getElementById('contact-text').textContent = t.contactText;
+  document.getElementById('contact-sms').textContent = t.contactSms;
+  document.getElementById('print-label').textContent = t.printLabel;
+
+  renderRoute();
+}
+
+function selectTransport(type) {
+  selectedTransport = type;
+  ['plane','train','bus'].forEach(t => {
+    document.getElementById('tc-'+t).classList.toggle('selected', t === type);
+  });
+  renderRoute();
+}
+
+function selectDest(dest) {
+  selectedDest = dest;
+  ['ratusz','jan'].forEach(d => {
+    document.getElementById('dc-'+d).classList.toggle('selected', d === dest);
+  });
+  renderRoute();
+}
+
+function renderRoute() {
+  const output = document.getElementById('route-output');
+  const content = document.getElementById('route-card-content');
+
+  if (!selectedTransport || !selectedDest) {
+    output.classList.remove('visible');
+    return;
+  }
+
+  const key = selectedTransport + '_' + selectedDest;
+  const route = ROUTES[currentLang][key];
+  const t = T[currentLang];
+
+  if (!route) { output.classList.remove('visible'); return; }
+
+  const stepsHtml = route.steps.map((s, i) => `
+    <li class="step">
+      <div class="step-num ${s.final ? 'final' : ''}">${s.final ? '★' : i+1}</div>
+      <div class="step-content">
+        <div class="step-title">${s.icon} ${s.title}</div>
+        <div class="step-desc">${s.desc}</div>
+        <span class="step-tag ${s.tag}">${s.tagText}</span>
+      </div>
+    </li>
+  `).join('');
+
+  content.innerHTML = `
+    <div class="route-header">
+      <div class="route-header-left">
+        <h3>${route.title}</h3>
+        <p>${route.subtitle}</p>
+      </div>
+      <div class="badge">${route.badge}</div>
+    </div>
+    <div class="route-body">
+      <ul class="steps">${stepsHtml}</ul>
+      <div class="tip-box">${t.tip}: ${route.tip}</div>
+      <a class="map-link" href="${route.mapUrl}" target="_blank">${t.mapsLink}</a>
+    </div>
+  `;
+
+  output.classList.add('visible');
+
+  // Smooth scroll to route
+  setTimeout(() => output.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+}
+</script>
+</body>
+</html>
